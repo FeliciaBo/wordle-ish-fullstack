@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import chooseWord from "./logic/chooseWord.js";
 
 const app = express();
 const PORT = 5080;
@@ -8,12 +9,27 @@ const PORT = 5080;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const words = ["apple", "grape", "stone", "plant", "chair", "house", "train"];
+
 app.use(express.static(path.join(__dirname, "../dist")));
 
-app.get("/*", (req, res) => {
+app.get("/api/word", (req, res) => {
+  try {
+    const length = parseInt(req.query.length) || 5;
+    const unique = req.query.unique === "true";
+
+    const word = chooseWord(words, length, unique);
+
+    res.json({ word });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/{*splat}", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
