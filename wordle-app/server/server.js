@@ -9,7 +9,7 @@ const PORT = 5080;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const words = ["apple", "grape", "stone", "plant", "chair", "house", "train"];
+const words = ["banan", "melon", "kiwi", "citron"];
 
 app.use(express.static(path.join(__dirname, "../dist")));
 
