@@ -21,7 +21,6 @@ app.get("/api/word", (req, res) => {
 
   // exempel på inställningar för ord 
   // - retunerar just nu "melon" eller "päron"
-  
   try {
     const length = parseInt(req.query.length) || 5;
     const unique = req.query.unique === "true";
