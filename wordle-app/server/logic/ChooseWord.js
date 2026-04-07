@@ -1,4 +1,4 @@
- export default function chooseWord(words, length, unique) {
+ function chooseWord(words, length, unique) {
 
   //felhantering
   
@@ -38,3 +38,5 @@ if (unique) {
   
   return filteredWords[randomIndex];
 }
+
+export default chooseWord;
