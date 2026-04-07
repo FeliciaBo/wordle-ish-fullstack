@@ -18,11 +18,7 @@
     throw new Error("Unique must be boolean");
   }
 
-
-  //filtrera ord
-
    let filteredWords = words.filter(word => word.length === length);
-
 if (unique) {
     filteredWords = filteredWords.filter(word => {
       const letters = new Set(word.split(""));
