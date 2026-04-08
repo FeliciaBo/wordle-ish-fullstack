@@ -1,5 +1,13 @@
 import { useState } from "react";
 import feedback from "../utils/feedback";
+import "./Home.scss";
+
+function getStatus(feedbackItem) {
+  if (feedbackItem.includes("incorrect")) return "incorrect";
+  if (feedbackItem.includes("misplaced")) return "misplaced";
+  if (feedbackItem.includes("correct")) return "correct";
+}
+
 
 function Home() {
   const [length, setLength] = useState(5);
@@ -75,6 +83,7 @@ function Home() {
         <label>
           Word length:
           <input
+            className="length-input"
             type="number"
             min="1"
             value={length}
@@ -87,6 +96,7 @@ function Home() {
         <label>
           Include repeated letters:
           <input
+            className="checkbox"
             type="checkbox"
             checked={allowRepeats}
             onChange={(event) => setAllowRepeats(event.target.checked)}
@@ -94,7 +104,9 @@ function Home() {
         </label>
       </div>
 
-      <button onClick={startGame}>Start game</button>
+      <button className="start-button" onClick={startGame}>
+        Start game
+      </button>
 
       {error && <p>Error: {error}</p>}
 
@@ -106,17 +118,20 @@ function Home() {
           {gameWon ? (
             <p>You won!</p>
           ) : (
-            <form onSubmit={handleSubmit}>
+            <form className="guess-form" onSubmit={handleSubmit}>
               <label>
                 Your guess:
                 <input
+                  className="guess-input"
                   type="text"
                   value={guess}
                   onChange={(event) => setGuess(event.target.value)}
                 />
               </label>
 
-              <button type="submit">Guess</button>
+              <button type="submit" className="guess-button">
+                Guess
+              </button>
             </form>
           )}
 
@@ -125,18 +140,27 @@ function Home() {
           {guesses.length === 0 ? (
             <p>No guesses yet.</p>
           ) : (
-            <ul>
-              {guesses.map((entry, index) => (
-                <li key={index}>
-                  <strong>{entry.guess}</strong>
-                  <ul>
-                    {entry.feedback.map((item, feedbackIndex) => (
-                      <li key={feedbackIndex}>{item}</li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
+            <div>
+  {guesses.map((entry, index) => (
+    <div key={index} className="row">
+      {entry.guess.split("").map((letter, letterIndex) => {
+        const status = getStatus(entry.feedback[letterIndex]);
+
+        let backgroundColor = "lightgray";
+
+        if (status === "correct") backgroundColor = "green";
+        if (status === "misplaced") backgroundColor = "gold";
+        if (status === "incorrect") backgroundColor = "tomato";
+
+        return (
+           <div key={letterIndex} className={`tile ${status}`}>
+            {letter}
+          </div>
+        );
+      })}
+    </div>
+  ))}
+</div>
           )}
         </div>
       )}

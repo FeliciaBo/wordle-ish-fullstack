@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+  background-color: #fff3e0;
+}
+
+body {
+  font-family: Roboto, Arial, sans-serif;
+  margin: 0;
+  padding: 2rem;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tile {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 4px;
+}
+
+.correct {
+  background-color: #43a047;
+}
+
+.misplaced {
+  background-color: #ff8f00;
+}
+
+.incorrect {
+  background-color: #b71c1c;
+}
+
