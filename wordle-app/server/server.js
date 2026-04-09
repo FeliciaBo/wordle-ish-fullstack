@@ -68,6 +68,7 @@ app.post("/api/guess", (req, res) => {
     game.guesses.push(normalizedGuess);
 
     const isCorrect = normalizedGuess === game.secretWord;
+    
     let timeMs = null;
 
     if (isCorrect) {

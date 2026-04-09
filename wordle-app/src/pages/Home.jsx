@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Home.scss";
 
+// helper functions
 function getStatus(feedbackItem) {
   return feedbackItem.split(": ")[1];
 }
 
 function formatTime(timeMs) {
-  if (timeMs === null || timeMs === undefined) return "";
-
-  const seconds = (timeMs / 1000).toFixed(1);
-  return `${seconds} seconds`;
-};
+  if (timeMs === null || timeMs === undefined) return "0.00";
+  return (timeMs / 1000).toFixed(2);
+}
 
 function Home() {
   const [length, setLength] = useState(5);
@@ -25,6 +24,20 @@ function Home() {
   const [result, setResult] = useState(null);
 
   const [error, setError] = useState("");
+
+  // Timer display logic
+  const [startTime, setStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    if (!gameStarted || gameWon || !startTime) return;
+
+    const interval = setInterval(() => {
+      setElapsedTime(Date.now() - startTime);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [gameStarted, gameWon, startTime]);
 
   async function startGame() {
     try {
@@ -48,6 +61,8 @@ function Home() {
 
       setGameId(data.gameId);
       setGameStarted(true);
+      setStartTime(Date.now());
+      setElapsedTime(0);
     } catch (err) {
       setError(err.message);
       setGameStarted(false);
@@ -88,12 +103,12 @@ function Home() {
       setGuess("");
 
       if (data.isCorrect) {
-     setGameWon(true);
-     setResult({
-     guessesCount: data.guessesCount,
-     timeMs: data.timeMs,
-  });
-}
+        setGameWon(true);
+        setResult({
+          guessesCount: data.guessesCount,
+          timeMs: data.timeMs,
+        });
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -137,18 +152,25 @@ function Home() {
       {gameStarted && (
         <div>
           <p>Game started.</p>
+          <p>
+            Time:{" "}
+            {gameWon && result
+              ? formatTime(result.timeMs)
+              : formatTime(elapsedTime)}{" "}
+            seconds
+          </p>
 
           {gameWon ? (
-        <div>
-         <p>You won!</p>
-          {result && (
-        <div>
-         <p>Guesses: {result.guessesCount}</p>
-         <p>Time: {formatTime(result.timeMs)}</p>
-       </div>
-        )}
-      </div>
-      ) : (
+            <div>
+              <p>You won!</p>
+              {result && (
+                <div>
+                  <p>Guesses: {result.guessesCount}</p>
+                  <p>Final time: {formatTime(result.timeMs)} seconds</p>
+                </div>
+              )}
+            </div>
+          ) : (
             <form className="guess-form" onSubmit={handleSubmit}>
               <label>
                 Your guess:
