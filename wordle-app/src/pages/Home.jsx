@@ -1,18 +1,14 @@
 import { useState } from "react";
-import feedback from "../utils/feedback";
 import "./Home.scss";
 
 function getStatus(feedbackItem) {
-  if (feedbackItem.includes("incorrect")) return "incorrect";
-  if (feedbackItem.includes("misplaced")) return "misplaced";
-  if (feedbackItem.includes("correct")) return "correct";
+  return feedbackItem.split(": ")[1];
 }
-
 
 function Home() {
   const [length, setLength] = useState(5);
   const [allowRepeats, setAllowRepeats] = useState(false);
-  const [secretWord, setSecretWord] = useState("");
+  const [gameId, setGameId] = useState("");
 
   const [guess, setGuess] = useState("");
   const [guesses, setGuesses] = useState([]);
@@ -22,12 +18,10 @@ function Home() {
   const [error, setError] = useState("");
 
   async function startGame() {
-    
     try {
       setError("");
       setGuess("");
       setGuesses([]);
-
       setGameWon(false);
 
       const unique = !allowRepeats;
@@ -42,32 +36,48 @@ function Home() {
         throw new Error(data.error || "Could not start game");
       }
 
-      setSecretWord(data.word.toLowerCase());
+      setGameId(data.gameId);
       setGameStarted(true);
     } catch (err) {
       setError(err.message);
       setGameStarted(false);
-      setSecretWord("");
+      setGameId("");
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
     try {
       const trimmedGuess = guess.trim().toLowerCase();
-      const feedbackResult = feedback(trimmedGuess, secretWord);
+
+      const response = await fetch("http://localhost:5080/api/guess", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          gameId,
+          guess: trimmedGuess,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not submit guess");
+      }
 
       const newGuessEntry = {
         guess: trimmedGuess,
-        feedback: feedbackResult,
+        feedback: data.feedback,
       };
 
       setGuesses([...guesses, newGuessEntry]);
       setGuess("");
 
-      if (trimmedGuess === secretWord) {
+      if (data.isCorrect) {
         setGameWon(true);
       }
     } catch (err) {
@@ -113,7 +123,6 @@ function Home() {
       {gameStarted && (
         <div>
           <p>Game started.</p>
-          <p>Secret word from server: {secretWord}</p>
 
           {gameWon ? (
             <p>You won!</p>
@@ -141,26 +150,20 @@ function Home() {
             <p>No guesses yet.</p>
           ) : (
             <div>
-  {guesses.map((entry, index) => (
-    <div key={index} className="row">
-      {entry.guess.split("").map((letter, letterIndex) => {
-        const status = getStatus(entry.feedback[letterIndex]);
+              {guesses.map((entry, index) => (
+                <div key={index} className="row">
+                  {entry.guess.split("").map((letter, letterIndex) => {
+                    const status = getStatus(entry.feedback[letterIndex]);
 
-        let backgroundColor = "lightgray";
-
-        if (status === "correct") backgroundColor = "green";
-        if (status === "misplaced") backgroundColor = "gold";
-        if (status === "incorrect") backgroundColor = "tomato";
-
-        return (
-           <div key={letterIndex} className={`tile ${status}`}>
-            {letter}
-          </div>
-        );
-      })}
-    </div>
-  ))}
-</div>
+                    return (
+                      <div key={letterIndex} className={`tile ${status}`}>
+                        {letter}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
