@@ -13,15 +13,13 @@ const PORT = 5080;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin", "jordgubb"];
+const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin", "jordgubb", "lime", "is", "i"];
 
 const games = {}; // Lagrar pågående spel
 
 app.use(cors());
 app.use(express.json());
 
-  // exempel på inställningar för ord 
-  // - retunerar just nu "melon" eller "päron"
 app.get("/api/word", (req, res) => {
   try {
     const length = parseInt(req.query.length) || 5;
