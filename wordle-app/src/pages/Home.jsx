@@ -5,6 +5,13 @@ function getStatus(feedbackItem) {
   return feedbackItem.split(": ")[1];
 }
 
+function formatTime(timeMs) {
+  if (timeMs === null || timeMs === undefined) return "";
+
+  const seconds = (timeMs / 1000).toFixed(1);
+  return `${seconds} seconds`;
+};
+
 function Home() {
   const [length, setLength] = useState(5);
   const [allowRepeats, setAllowRepeats] = useState(false);
@@ -15,6 +22,8 @@ function Home() {
 
   const [gameStarted, setGameStarted] = useState(false);
   const [gameWon, setGameWon] = useState(false);
+  const [result, setResult] = useState(null);
+
   const [error, setError] = useState("");
 
   async function startGame() {
@@ -23,6 +32,7 @@ function Home() {
       setGuess("");
       setGuesses([]);
       setGameWon(false);
+      setResult(null);
 
       const unique = !allowRepeats;
 
@@ -78,8 +88,12 @@ function Home() {
       setGuess("");
 
       if (data.isCorrect) {
-        setGameWon(true);
-      }
+     setGameWon(true);
+     setResult({
+     guessesCount: data.guessesCount,
+     timeMs: data.timeMs,
+  });
+}
     } catch (err) {
       setError(err.message);
     }
@@ -125,8 +139,16 @@ function Home() {
           <p>Game started.</p>
 
           {gameWon ? (
-            <p>You won!</p>
-          ) : (
+        <div>
+         <p>You won!</p>
+          {result && (
+        <div>
+         <p>Guesses: {result.guessesCount}</p>
+         <p>Time: {formatTime(result.timeMs)}</p>
+       </div>
+        )}
+      </div>
+      ) : (
             <form className="guess-form" onSubmit={handleSubmit}>
               <label>
                 Your guess:

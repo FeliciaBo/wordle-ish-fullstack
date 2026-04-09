@@ -13,9 +13,9 @@ const PORT = 5080;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin", "jordgubb", "lime", "is", "i"];
+const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin", "jordgubb", "lime", "is", "i" ];
 
-const games = {}; // Lagrar pågående spel
+const games = {};
 
 app.use(cors());
 app.use(express.json());
@@ -68,16 +68,19 @@ app.post("/api/guess", (req, res) => {
     game.guesses.push(normalizedGuess);
 
     const isCorrect = normalizedGuess === game.secretWord;
+    let timeMs = null;
 
     if (isCorrect) {
       game.isFinished = true;
       game.finishedAt = Date.now();
+      timeMs = game.finishedAt - game.startedAt;
     }
 
     res.json({
       feedback: feedbackResult,
       isCorrect,
       guessesCount: game.guesses.length,
+      timeMs,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -93,5 +96,3 @@ app.get("/{*splat}", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
-
