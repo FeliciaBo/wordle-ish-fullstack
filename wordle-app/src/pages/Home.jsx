@@ -151,14 +151,12 @@ function Home() {
 
       {gameStarted && (
         <div>
-          <p>Game started.</p>
-          <p>
-            Time:{" "}
-            {gameWon && result
-              ? formatTime(result.timeMs)
-              : formatTime(elapsedTime)}{" "}
-            seconds
-          </p>
+          {!gameWon && (
+  <>
+    <p>Game started.</p>
+    <p>Time: {formatTime(elapsedTime)} seconds</p>
+  </>
+)}
 
           {gameWon ? (
             <div>
