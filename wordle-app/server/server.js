@@ -44,6 +44,7 @@ function renderHighscoresPage(highscores) {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/global.css" />
         <title>Highscores</title>
         
       </head>
@@ -222,6 +223,7 @@ app.get("/highscores", async (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, "../dist")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.get("/{*splat}", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));

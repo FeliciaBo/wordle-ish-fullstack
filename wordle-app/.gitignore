@@ -25,3 +25,8 @@ dist-ssr
 
 .env
 .env.local
+
+# Css source maps
+*.css.map
+Home.css
+Navbar.css
