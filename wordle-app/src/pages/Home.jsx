@@ -37,7 +37,8 @@ function Home() {
       setElapsedTime(Date.now() - startTime);
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => 
+      clearInterval(interval);
   }, [gameStarted, gameWon, startTime]);
 
   async function startGame() {
@@ -147,6 +148,7 @@ function Home() {
 
   return (
     <div>
+      <h1>Wordle Game</h1>
       <h2>Start Game</h2>
 
       <div>
