@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Highscores</title>
+    <link rel="stylesheet" href="/global.css" />
+  </head>
+  <body>
+    <main>
+      <a href="/">Back to game</a>
+      <h1>Highscores</h1>
+
+      <% if (highscores.length === 0) { %>
+        <p>No highscores yet.</p>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Time</th>
+              <th>Guesses</th>
+              <th>Word length</th>
+              <th>Unique letters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% highscores.forEach((score) => { %>
+              <tr>
+                <td><%= score.name %></td>
+                <td><%= (score.timeMs / 1000).toFixed(2) %> s</td>
+                <td><%= score.guessesCount %></td>
+                <td><%= score.length %></td>
+                <td><%= score.unique ? "Yes" : "No" %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </main>
+  </body>
+</html>

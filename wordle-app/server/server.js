@@ -23,60 +23,6 @@ const games = {};
 app.use(cors());
 app.use(express.json());
 
-function renderHighscoresPage(highscores) {
-  const rows = highscores
-    .map((score) => {
-      return `
-        <tr>
-          <td>${score.name}</td>
-          <td>${(score.timeMs / 1000).toFixed(2)} s</td>
-          <td>${score.guessesCount}</td>
-          <td>${score.length}</td>
-          <td>${score.unique ? "Yes" : "No"}</td>
-        </tr>
-      `;
-    })
-    .join("");
-
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="/global.css" />
-        <title>Highscores</title>
-        
-      </head>
-      <body>
-        <a href="/">Back to game</a>
-        <h1>Highscores</h1>
-
-        ${
-          highscores.length === 0
-            ? "<p>No highscores yet.</p>"
-            : `
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Time</th>
-                    <th>Guesses</th>
-                    <th>Word length</th>
-                    <th>Unique letters</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rows}
-                </tbody>
-              </table>
-            `
-        }
-      </body>
-    </html>
-  `;
-}
-
 app.get("/api/word", (req, res) => {
   try {
     const length = parseInt(req.query.length) || 5;
@@ -186,7 +132,7 @@ app.post("/api/highscores", async (req, res) => {
   }
 });
 
-app.get("/api/highscores", async (req, res) => {
+app.get("/highscores", async (req, res) => {
   try {
     const db = await connectToDatabase();
 
@@ -196,9 +142,12 @@ app.get("/api/highscores", async (req, res) => {
       .sort({ timeMs: 1, guessesCount: 1, createdAt: 1 })
       .toArray();
 
-    res.json(highscores);
+    res.render("highscores", { highscores });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).send(`
+      <h1>Could not load highscores</h1>
+      <p>${error.message}</p>
+    `);
   }
 });
 
@@ -224,6 +173,9 @@ app.get("/highscores", async (req, res) => {
 
 app.use(express.static(path.join(__dirname, "../dist")));
 app.use(express.static(path.join(__dirname, "../public")));
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 app.get("/{*splat}", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));

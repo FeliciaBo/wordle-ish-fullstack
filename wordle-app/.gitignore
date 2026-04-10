@@ -28,5 +28,6 @@ dist-ssr
 
 # Css source maps
 *.css.map
+
 Home.css
 Navbar.css
