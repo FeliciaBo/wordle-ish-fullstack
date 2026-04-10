@@ -4,6 +4,7 @@ nav {
     display: flex;
     margin-bottom: 4rem;
 
+
 }
 nav a {
     display: flex;
@@ -13,7 +14,13 @@ nav a {
     padding-right: 2rem;
     color:#1e1e1e;
 
+    font-size: 1.2rem;
+
     &:hover {
         color: #b71c1c;
     }
+}
+
+nav a:last-child {
+    margin-left: auto;
 }

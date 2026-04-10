@@ -5,7 +5,9 @@ function Navbar() {
   return (
     <nav>
       <Link to="/">Wordle Game</Link> {" "}
+      <a href="/highscores">Highscores</a>
       <Link to="/about">About</Link>
+
       
     </nav>
   );
