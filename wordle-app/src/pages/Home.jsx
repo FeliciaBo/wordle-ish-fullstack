@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import "./Home.scss";
 
-// helper functions
 function getStatus(feedbackItem) {
   return feedbackItem.split(": ")[1];
 }
@@ -23,9 +22,11 @@ function Home() {
   const [gameWon, setGameWon] = useState(false);
   const [result, setResult] = useState(null);
 
+  const [playerName, setPlayerName] = useState("");
+  const [scoreSaved, setScoreSaved] = useState(false);
+
   const [error, setError] = useState("");
 
-  // Timer display logic
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
 
@@ -46,6 +47,8 @@ function Home() {
       setGuesses([]);
       setGameWon(false);
       setResult(null);
+      setPlayerName("");
+      setScoreSaved(false);
 
       const unique = !allowRepeats;
 
@@ -114,6 +117,34 @@ function Home() {
     }
   }
 
+  async function handleSaveScore(event) {
+    event.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:5080/api/highscores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          gameId,
+          name: playerName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not save score");
+      }
+
+      setScoreSaved(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   return (
     <div>
       <h2>Start Game</h2>
@@ -152,20 +183,38 @@ function Home() {
       {gameStarted && (
         <div>
           {!gameWon && (
-  <>
-    <p>Game started.</p>
-    <p>Time: {formatTime(elapsedTime)} seconds</p>
-  </>
-)}
+            <>
+              <p>Game started.</p>
+              <p>Time: {formatTime(elapsedTime)} seconds</p>
+            </>
+          )}
 
           {gameWon ? (
             <div>
               <p>You won!</p>
+
               {result && (
                 <div>
                   <p>Guesses: {result.guessesCount}</p>
                   <p>Final time: {formatTime(result.timeMs)} seconds</p>
                 </div>
+              )}
+
+              {scoreSaved ? (
+                <p>Score saved!</p>
+              ) : (
+                <form onSubmit={handleSaveScore}>
+                  <label>
+                    Your name:
+                    <input
+                      type="text"
+                      value={playerName}
+                      onChange={(event) => setPlayerName(event.target.value)}
+                    />
+                  </label>
+
+                  <button type="submit">Save score</button>
+                </form>
               )}
             </div>
           ) : (

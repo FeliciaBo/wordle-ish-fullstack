@@ -17,6 +17,8 @@ const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin"
 
 const games = {};
 
+const highscores = [];
+
 app.use(cors());
 app.use(express.json());
 
@@ -86,6 +88,50 @@ app.post("/api/guess", (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
+});
+
+app.post("/api/highscores", (req, res) => {
+  try {
+    const { gameId, name } = req.body;
+
+    if (!gameId || !name?.trim()) {
+      throw new Error("gameId and name are required");
+    }
+
+    const game = games[gameId];
+
+    if (!game) {
+      throw new Error("Game not found");
+    }
+
+    if (!game.isFinished || !game.finishedAt) {
+      throw new Error("Game is not finished");
+    }
+
+    const score = {
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      timeMs: game.finishedAt - game.startedAt,
+      guessesCount: game.guesses.length,
+      guesses: game.guesses,
+      length: game.length,
+      unique: game.unique,
+      createdAt: new Date().toISOString(),
+    };
+
+    highscores.push(score);
+
+    res.status(201).json({
+      message: "Score saved",
+      score,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/api/highscores", (req, res) => {
+  res.json(highscores);
 });
 
 app.use(express.static(path.join(__dirname, "../dist")));
