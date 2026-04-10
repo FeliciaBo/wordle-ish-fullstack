@@ -1,11 +1,14 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
+
 import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
 
 import chooseWord from "./logic/chooseWord.js";
 import feedback from "./logic/feedback.js";
+import connectToDatabase from "./db/mongodb.js";
 
 const app = express();
 const PORT = 5080;
@@ -16,8 +19,6 @@ const __dirname = path.dirname(__filename);
 const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin", "jordgubb", "lime", "is", "i" ];
 
 const games = {};
-
-const highscores = [];
 
 app.use(cors());
 app.use(express.json());
@@ -90,7 +91,7 @@ app.post("/api/guess", (req, res) => {
   }
 });
 
-app.post("/api/highscores", (req, res) => {
+app.post("/api/highscores", async (req, res) => {
   try {
     const { gameId, name } = req.body;
 
@@ -109,20 +110,21 @@ app.post("/api/highscores", (req, res) => {
     }
 
     const score = {
-      id: crypto.randomUUID(),
       name: name.trim(),
       timeMs: game.finishedAt - game.startedAt,
       guessesCount: game.guesses.length,
       guesses: game.guesses,
       length: game.length,
       unique: game.unique,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
 
-    highscores.push(score);
+    const db = await connectToDatabase();
+    const result = await db.collection("highscores").insertOne(score);
 
     res.status(201).json({
       message: "Score saved",
+      insertedId: result.insertedId,
       score,
     });
   } catch (error) {
@@ -130,8 +132,20 @@ app.post("/api/highscores", (req, res) => {
   }
 });
 
-app.get("/api/highscores", (req, res) => {
-  res.json(highscores);
+app.get("/api/highscores", async (req, res) => {
+  try {
+    const db = await connectToDatabase();
+
+    const highscores = await db
+      .collection("highscores")
+      .find({})
+      .sort({ timeMs: 1, guessesCount: 1, createdAt: 1 })
+      .toArray();
+
+    res.json(highscores);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.use(express.static(path.join(__dirname, "../dist")));
