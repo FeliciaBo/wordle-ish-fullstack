@@ -150,34 +150,38 @@ function Home() {
     <div>
       <h1>Wordle Game</h1>
 
-      <div>
-        <label>
-          Word length:
-          <input
-            className="length-input"
-            type="number"
-            min="1"
-            value={length}
-            onChange={(event) => setLength(Number(event.target.value))}
-          />
-        </label>
-      </div>
+      {!gameStarted && (
+  <>
+    <div>
+      <label>
+        Word length:
+        <input
+          className="length-input"
+          type="number"
+          min="1"
+          value={length}
+          onChange={(event) => setLength(Number(event.target.value))}
+        />
+      </label>
+    </div>
 
-      <div>
-        <label>
-          Include repeated letters:
-          <input
-            className="checkbox"
-            type="checkbox"
-            checked={allowRepeats}
-            onChange={(event) => setAllowRepeats(event.target.checked)}
-          />
-        </label>
-      </div>
+    <div>
+      <label>
+        Include repeated letters:
+        <input
+          className="checkbox"
+          type="checkbox"
+          checked={allowRepeats}
+          onChange={(event) => setAllowRepeats(event.target.checked)}
+        />
+      </label>
+    </div>
 
-      <button className="start-button" onClick={startGame}>
-        Start game
-      </button>
+    <button className="start-button" onClick={startGame}>
+      Start game
+    </button>
+  </>
+)}
 
       {error && <p>Error: {error}</p>}
 
@@ -191,6 +195,7 @@ function Home() {
           )}
 
           {gameWon ? (
+            
             <div>
               <p>You won!</p>
 
