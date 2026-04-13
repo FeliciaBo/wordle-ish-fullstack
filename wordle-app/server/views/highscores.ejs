@@ -12,8 +12,39 @@
       <a href="/">Back to game</a>
       <h1>Highscores</h1>
 
+      <form method="GET" action="/highscores">
+        <div>
+          <label for="length">Word length:</label>
+          <input
+            id="length"
+            type="number"
+            name="length"
+            min="1"
+            value="<%= filters.length %>"
+          />
+        </div>
+
+        <div>
+          <label for="unique">Unique letters:</label>
+          <select id="unique" name="unique">
+            <option value="" <%= filters.unique === "" ? "selected" : "" %>>
+              All
+            </option>
+            <option value="true" <%= filters.unique === "true" ? "selected" : "" %>>
+              Yes
+            </option>
+            <option value="false" <%= filters.unique === "false" ? "selected" : "" %>>
+              No
+            </option>
+          </select>
+        </div>
+
+        <button type="submit">Filter</button>
+        <a href="/highscores">Clear filters</a>
+      </form>
+
       <% if (highscores.length === 0) { %>
-        <p>No highscores yet.</p>
+        <p>No highscores found for these filters.</p>
       <% } else { %>
         <table>
           <thead>

@@ -134,40 +134,83 @@ app.post("/api/highscores", async (req, res) => {
 
 app.get("/highscores", async (req, res) => {
   try {
+    const { length, unique } = req.query;
+
+    const query = {};
+    const filters = {
+      length: "",
+      unique: "",
+    };
+
+    if (length) {
+      const parsedLength = parseInt(length, 10);
+
+      if (Number.isNaN(parsedLength) || parsedLength <= 0) {
+        throw new Error("length must be a positive number");
+      }
+
+      query.length = parsedLength;
+      filters.length = parsedLength;
+    }
+
+    if (unique === "true") {
+      query.unique = true;
+      filters.unique = "true";
+    } else if (unique === "false") {
+      query.unique = false;
+      filters.unique = "false";
+    }
+
     const db = await connectToDatabase();
 
     const highscores = await db
       .collection("highscores")
-      .find({})
+      .find(query)
       .sort({ timeMs: 1, guessesCount: 1, createdAt: 1 })
       .toArray();
 
-    res.render("highscores", { highscores });
+    res.render("highscores", { highscores, filters });
   } catch (error) {
     res.status(500).send(`
-      <h1>Could not load highscores</h1>
+      <h2>Could not load highscores :(</h2>
       <p>${error.message}</p>
     `);
   }
 });
 
-app.get("/highscores", async (req, res) => {
+app.get("/api/highscores", async (req, res) => {
   try {
+    const { length, unique } = req.query;
+
+    const query = {};
+
+    if (length) {
+      const parsedLength = parseInt(length, 10);
+
+      if (Number.isNaN(parsedLength) || parsedLength <= 0) {
+        throw new Error("length must be a positive number");
+      }
+
+      query.length = parsedLength;
+    }
+
+    if (unique === "true") {
+      query.unique = true;
+    } else if (unique === "false") {
+      query.unique = false;
+    }
+
     const db = await connectToDatabase();
 
     const highscores = await db
       .collection("highscores")
-      .find({})
+      .find(query)
       .sort({ timeMs: 1, guessesCount: 1, createdAt: 1 })
       .toArray();
 
-    const html = renderHighscoresPage(highscores);
-    res.send(html);
+    res.json(highscores);
   } catch (error) {
-    res.status(500).send(`
-      <h1>Could not load highscores</h1>
-      <p>${error.message}</p>
-    `);
+    res.status(500).json({ error: error.message });
   }
 });
 
