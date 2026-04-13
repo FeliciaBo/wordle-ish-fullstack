@@ -1,26 +1,29 @@
 import { useState, useEffect } from "react";
 import "./Home.scss";
 
+const API_BASE = "http://localhost:5080/api";
+
 function getStatus(feedbackItem) {
-  return feedbackItem.split(": ")[1];
+  return feedbackItem?.split(": ")[1] || "";
 }
 
-function formatTime(timeMs) {
-  if (timeMs === null || timeMs === undefined) return "0.00";
+function formatTime(timeMs = 0) {
   return (timeMs / 1000).toFixed(2);
 }
 
 function Home() {
   const [length, setLength] = useState(5);
   const [allowRepeats, setAllowRepeats] = useState(false);
-  const [gameId, setGameId] = useState("");
 
+  const [gameId, setGameId] = useState("");
   const [guess, setGuess] = useState("");
   const [guesses, setGuesses] = useState([]);
 
   const [gameStarted, setGameStarted] = useState(false);
   const [gameWon, setGameWon] = useState(false);
+
   const [result, setResult] = useState(null);
+  const [correctWord, setCorrectWord] = useState("");
 
   const [playerName, setPlayerName] = useState("");
   const [scoreSaved, setScoreSaved] = useState(false);
@@ -37,9 +40,23 @@ function Home() {
       setElapsedTime(Date.now() - startTime);
     }, 100);
 
-    return () => 
-      clearInterval(interval);
+    return () => clearInterval(interval);
   }, [gameStarted, gameWon, startTime]);
+
+  function resetToStartView() {
+    setGameId("");
+    setGuess("");
+    setGuesses([]);
+    setGameStarted(false);
+    setGameWon(false);
+    setResult(null);
+    setCorrectWord("");
+    setPlayerName("");
+    setScoreSaved(false);
+    setError("");
+    setStartTime(null);
+    setElapsedTime(0);
+  }
 
   async function startGame() {
     try {
@@ -48,15 +65,15 @@ function Home() {
       setGuesses([]);
       setGameWon(false);
       setResult(null);
+      setCorrectWord("");
       setPlayerName("");
       setScoreSaved(false);
 
       const unique = !allowRepeats;
 
       const response = await fetch(
-        `http://localhost:5080/api/word?length=${length}&unique=${unique}`
+        `${API_BASE}/word?length=${length}&unique=${unique}`
       );
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -81,7 +98,7 @@ function Home() {
     try {
       const trimmedGuess = guess.trim().toLowerCase();
 
-      const response = await fetch("http://localhost:5080/api/guess", {
+      const response = await fetch(`${API_BASE}/guess`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +120,7 @@ function Home() {
         feedback: data.feedback,
       };
 
-      setGuesses([...guesses, newGuessEntry]);
+      setGuesses((prev) => [...prev, newGuessEntry]);
       setGuess("");
 
       if (data.isCorrect) {
@@ -112,6 +129,7 @@ function Home() {
           guessesCount: data.guessesCount,
           timeMs: data.timeMs,
         });
+        setCorrectWord(trimmedGuess);
       }
     } catch (err) {
       setError(err.message);
@@ -123,7 +141,7 @@ function Home() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5080/api/highscores", {
+      const response = await fetch(`${API_BASE}/highscores`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -150,96 +168,60 @@ function Home() {
     <div>
       <h1>Wordle Game</h1>
 
-      {!gameStarted && (
-  <>
-    <div>
-      <label>
-        Word length:
-        <input
-          className="length-input"
-          type="number"
-          min="1"
-          value={length}
-          onChange={(event) => setLength(Number(event.target.value))}
-        />
-      </label>
-    </div>
-
-    <div>
-      <label>
-        Include repeated letters:
-        <input
-          className="checkbox"
-          type="checkbox"
-          checked={allowRepeats}
-          onChange={(event) => setAllowRepeats(event.target.checked)}
-        />
-      </label>
-    </div>
-
-    <button className="start-button" onClick={startGame}>
-      Start game
-    </button>
-  </>
-)}
-
       {error && <p>Error: {error}</p>}
 
-      {gameStarted && (
+      {!gameStarted && (
         <div>
-          {!gameWon && (
-            <>
-              <p>Game started.</p>
-              <p>Time: {formatTime(elapsedTime)} seconds</p>
-            </>
-          )}
+          <div>
+            <label>
+              Word length:
+              <input
+                className="length-input"
+                type="number"
+                min="1"
+                value={length}
+                onChange={(event) => setLength(Number(event.target.value))}
+              />
+            </label>
+          </div>
 
-          {gameWon ? (
-            
-            <div>
-              <p>You won!</p>
+          <div>
+            <label>
+              Include repeated letters:
+              <input
+                className="checkbox"
+                type="checkbox"
+                checked={allowRepeats}
+                onChange={(event) => setAllowRepeats(event.target.checked)}
+              />
+            </label>
+          </div>
 
-              {result && (
-                <div>
-                  <p>Guesses: {result.guessesCount}</p>
-                  <p>Final time: {formatTime(result.timeMs)} seconds</p>
-                </div>
-              )}
+          <button className="start-button" onClick={startGame}>
+            Start game
+          </button>
+        </div>
+      )}
 
-              {scoreSaved ? (
-                <p>Score saved!</p>
-              ) : (
-                <form onSubmit={handleSaveScore}>
-                  <label>
-                    Your name:
-                    <input
-                      type="text"
-                      value={playerName}
-                      onChange={(event) => setPlayerName(event.target.value)}
-                    />
-                  </label>
+      {gameStarted && !gameWon && (
+        <div>
+          <p>Time: {formatTime(elapsedTime)} seconds</p>
 
-                  <button type="submit">Save score</button>
-                </form>
-              )}
-            </div>
-          ) : (
-            <form className="guess-form" onSubmit={handleSubmit}>
-              <label>
-                Your guess:
-                <input
-                  className="guess-input"
-                  type="text"
-                  value={guess}
-                  onChange={(event) => setGuess(event.target.value)}
-                />
-              </label>
+          <form className="guess-form" onSubmit={handleSubmit}>
+            <label>
+              Your guess:
+              <input
+                className="guess-input"
+                type="text"
+                value={guess}
+                onChange={(event) => setGuess(event.target.value)}
+              />
+            </label>
 
-              <button type="submit" className="guess-button">
-                Guess
-              </button>
-            </form>
-          )}
+            <button type="submit" className="guess-button">
+              Guess
+            </button>
+          </form>
 
           <h3>Previous guesses</h3>
 
@@ -262,6 +244,50 @@ function Home() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {gameStarted && gameWon && (
+        <div>
+          <p>You won!</p>
+
+          {result && (
+            <div>
+              <p>Guesses: {result.guessesCount}</p>
+              <p>Final time: {formatTime(result.timeMs)} seconds</p>
+            </div>
+          )}
+
+          {correctWord && (
+            <div className="row">
+              {correctWord.split("").map((letter, index) => (
+                <div key={index} className="tile correct">
+                  {letter}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!scoreSaved ? (
+            <form onSubmit={handleSaveScore}>
+              <label>
+                Your name:
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={(event) => setPlayerName(event.target.value)}
+                />
+              </label>
+
+              <button type="submit">Save score</button>
+            </form>
+          ) : (
+            <p>Score saved!</p>
+          )}
+
+          <button className="start-button" onClick={resetToStartView}>
+            Start new game
+          </button>
         </div>
       )}
     </div>
