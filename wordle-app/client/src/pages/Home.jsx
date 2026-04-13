@@ -149,7 +149,6 @@ function Home() {
   return (
     <div>
       <h1>Wordle Game</h1>
-      <h2>Start Game</h2>
 
       <div>
         <label>
