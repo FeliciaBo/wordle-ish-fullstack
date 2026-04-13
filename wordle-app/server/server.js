@@ -10,6 +10,9 @@ import chooseWord from "./logic/chooseWord.js";
 import feedback from "./logic/feedback.js";
 import connectToDatabase from "./db/mongodb.js";
 
+import parseHighscoreFilters from "./dist-ts/utils/parseHighscoreFilters.js";
+import buildHighscoreQuery from "./dist-ts/utils/buildHighscoreQuery.js";
+
 const app = express();
 const PORT = 5080;
 
@@ -134,32 +137,8 @@ app.post("/api/highscores", async (req, res) => {
 
 app.get("/highscores", async (req, res) => {
   try {
-    const { length, unique } = req.query;
-
-    const query = {};
-    const filters = {
-      length: "",
-      unique: "",
-    };
-
-    if (length) {
-      const parsedLength = parseInt(length, 10);
-
-      if (Number.isNaN(parsedLength) || parsedLength <= 0) {
-        throw new Error("length must be a positive number");
-      }
-
-      query.length = parsedLength;
-      filters.length = parsedLength;
-    }
-
-    if (unique === "true") {
-      query.unique = true;
-      filters.unique = "true";
-    } else if (unique === "false") {
-      query.unique = false;
-      filters.unique = "false";
-    }
+    const filters = parseHighscoreFilters(req.query);
+    const query = buildHighscoreQuery(filters);
 
     const db = await connectToDatabase();
 
@@ -169,10 +148,20 @@ app.get("/highscores", async (req, res) => {
       .sort({ timeMs: 1, guessesCount: 1, createdAt: 1 })
       .toArray();
 
-    res.render("highscores", { highscores, filters });
+    const viewFilters = {
+      length: filters.length ?? "",
+      unique:
+        filters.unique === true
+          ? "true"
+          : filters.unique === false
+          ? "false"
+          : "",
+    };
+
+    res.render("highscores", { highscores, filters: viewFilters });
   } catch (error) {
     res.status(500).send(`
-      <h2>Could not load highscores :(</h2>
+      <h1>Could not load highscores</h1>
       <p>${error.message}</p>
     `);
   }
@@ -180,25 +169,8 @@ app.get("/highscores", async (req, res) => {
 
 app.get("/api/highscores", async (req, res) => {
   try {
-    const { length, unique } = req.query;
-
-    const query = {};
-
-    if (length) {
-      const parsedLength = parseInt(length, 10);
-
-      if (Number.isNaN(parsedLength) || parsedLength <= 0) {
-        throw new Error("length must be a positive number");
-      }
-
-      query.length = parsedLength;
-    }
-
-    if (unique === "true") {
-      query.unique = true;
-    } else if (unique === "false") {
-      query.unique = false;
-    }
+    const filters = parseHighscoreFilters(req.query);
+    const query = buildHighscoreQuery(filters);
 
     const db = await connectToDatabase();
 
