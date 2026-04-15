@@ -22,8 +22,6 @@ Spel:
  - Spelresultat visas:  
     - antal gissningar
     - tid (från backend)
-    - rätt ord
-
 
  - Knapp och input för att skicka in resultat till highscore
  - Knapp för att starta nytt spel
@@ -36,8 +34,8 @@ Spel:
 
   Mockord:
    - "melon" (default: ingen duplicate, 5 bokstäver)
-   -  "banan" (duplicate tillåten, 5 bokstäver)
    - "bär" (ingen duplicate, 3 bokstäver)
+   -  "banana" (duplicate tillåten, 6 bokstäver)
 
 
 Tester:
@@ -56,6 +54,7 @@ Tester:
 - D: Ord med flera av samma bokstav
   - testar även att det går att skicka in resultat till highscore
     och syns i highscore-listan
+  - testar att filtreringen av highscores fungerar (ord-längd och duplicate)
 
 */
 
@@ -81,7 +80,7 @@ await page.getByRole("button", { name: "Guess" }).click();
 
 });
 
-test('B: Incorrect guess followed by correct guess (word: "melon")', async ({ page }) => {
+test('B: Incorrect guess followed by correct guess', async ({ page }) => {
   await page.goto('/');
 
   await page.getByRole("button", { name: "Start game" }).click();
@@ -106,10 +105,8 @@ test('B: Incorrect guess followed by correct guess (word: "melon")', async ({ pa
 
 });
 
-test('C: 3-letter word (word: "bär") + start new game', async ({ page }) => {
+test('C: 3-letter word + start new game', async ({ page }) => {
   await page.goto('/');
-
-  await page.goto("/");
 
   await page.getByLabel("Word length:").fill("3");
   await page.getByRole("button", { name: "Start game" }).click();
@@ -131,8 +128,25 @@ test('C: 3-letter word (word: "bär") + start new game', async ({ page }) => {
 });
 
 
-test('D: Word with duplicate letters (word: "banan") + send to highscore ', async ({ page }) => {
+test('D: Duplicate letter word + shows up in highscores, with filter', async ({ page }) => {
   await page.goto('/');
 
+  await page.getByLabel("Word length:").fill("6");
+  await page.getByLabel("Include repeated letters:").check();
+  await page.getByRole("button", { name: "Start game" }).click();
+
+  await page.getByLabel("Your guess:").fill("banana");
+  await page.getByRole("button", { name: "Guess" }).click();
+  await expect(page.getByText("You won!")).toBeVisible();
+
+  const playerName = `TestPlayer-${Date.now()}`;
+  await page.getByLabel("Your name:").fill(playerName);
+
+  await page.getByRole("button", { name: "Save score" }).click();
+
+  await expect(page.getByText("Score saved!")).toBeVisible();
+
+  await page.goto("/highscores?length=6&unique=false");
+  await expect(page.getByText(playerName)).toBeVisible();
   
 });

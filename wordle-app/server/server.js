@@ -26,7 +26,7 @@ const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin"
 function getMockWord(length, unique) {
   const mockWords = {
     "5-true": "melon",
-    "5-false": "banan",
+    "6-false": "banana",
     "3-true": "bär",
   };
 
