@@ -45,7 +45,9 @@ Tester:
   - testar även uppstart av spelet och default filtrering 
 
 - B: Fel gissning, följt av rätt gissning (default filtrering)
-  - testar att man får ett nytt försök och att antal gissningar går upp 
+  - testar att man får ett nytt försök 
+  - feedbakc: correct, misplaced och incorrect visas
+  - antal gissningar går upp 
 
 */
 
@@ -76,14 +78,15 @@ test('B: Incorrect guess followed by correct guess', async ({ page }) => {
 
   await page.getByRole("button", { name: "Start game" }).click();
 
-  await page.getByLabel("Your guess:").fill("päron");
+  await page.getByLabel("Your guess:").fill("pämon");
   await page.getByRole("button", { name: "Guess" }).click();
 
   const firstRow = page.locator(".row").first();
 
   await expect(firstRow.locator(".tile")).toHaveCount(5);
   await expect(firstRow.locator(".correct")).toHaveCount(2);
-  await expect(firstRow.locator(".incorrect")).toHaveCount(3);
+  await expect(firstRow.locator(".incorrect")).toHaveCount(2);
+  await expect(firstRow.locator(".misplaced")).toHaveCount(1);
     await expect(page.getByText("You won!")).not.toBeVisible();
 
   await page.getByLabel("Your guess:").fill("melon");
