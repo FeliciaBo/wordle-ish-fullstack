@@ -1,3 +1,5 @@
+import { test, expect } from '@playwright/test';
+ 
 /* Testning:
 
 Spel:
@@ -39,5 +41,15 @@ Spel:
    -  "banan" (duplicate tillåten, 5 bokstäver)
    - "bär" (ingen duplicate, 3 bokstäver)
 
-   
+
+Tester:
+- A: "happy path" - default inställningar, rätt svar direkt
+
 */
+
+test('Default game settings and immediate win', async ({ page }) => {
+await page.goto('/');
+  
+await expect(page.getByRole("heading", { name: "Wordle Game" })).toBeVisible();
+
+});

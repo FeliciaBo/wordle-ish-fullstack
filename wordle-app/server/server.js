@@ -21,17 +21,39 @@ const __dirname = path.dirname(__filename);
 
 const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin", "jordgubb", "lime", "is", "i" ];
 
+function getMockWord(length, unique) {
+  const mockWords = {
+    "5-true": "melon",
+    "5-false": "banan",
+    "3-true": "bar",
+  };
+
+  return mockWords[`${length}-${unique}`] || null;
+}
+
 const games = {};
 
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/word", (req, res) => {
+app.get("/api/word", async (req, res) => {
   try {
     const length = parseInt(req.query.length) || 5;
     const unique = req.query.unique === "true";
 
-    const word = chooseWord(words, length, unique);
+    let word;
+
+    if (process.env.TEST_MODE === "true") {
+      word = getMockWord(length, unique);
+
+      if (!word) {
+        throw new Error("No mock word found for these settings");
+      }
+    } else {
+      const words = await loadWords(); // or your current words source
+      word = chooseWord(words, length, unique);
+    }
+
     const gameId = crypto.randomUUID();
 
     games[gameId] = {
@@ -42,6 +64,7 @@ app.get("/api/word", (req, res) => {
       startedAt: Date.now(),
       isFinished: false,
       finishedAt: null,
+      scoreSaved: false,
     };
 
     res.json({ gameId });
@@ -169,6 +192,11 @@ app.get("/highscores", async (req, res) => {
 
 app.get("/api/highscores", async (req, res) => {
   try {
+
+   if (game.scoreSaved) {
+   throw new Error("Score already saved");
+   }
+
     const filters = parseHighscoreFilters(req.query);
     const query = buildHighscoreQuery(filters);
 
@@ -181,6 +209,8 @@ app.get("/api/highscores", async (req, res) => {
       .toArray();
 
     res.json(highscores);
+    game.scoreSaved = true;
+    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
