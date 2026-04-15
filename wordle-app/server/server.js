@@ -50,7 +50,6 @@ app.get("/api/word", async (req, res) => {
         throw new Error("No mock word found for these settings");
       }
     } else {
-      const words = await loadWords(); // or your current words source
       word = chooseWord(words, length, unique);
     }
 
@@ -210,7 +209,7 @@ app.get("/api/highscores", async (req, res) => {
 
     res.json(highscores);
     game.scoreSaved = true;
-    
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

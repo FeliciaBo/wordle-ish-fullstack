@@ -20,12 +20,10 @@ Spel:
 3. Spel slut:
  - "Du vann"-text
  - Spelresultat visas:  
-    - tid (från backend)
     - antal gissningar
+    - tid (från backend)
     - rätt ord
-    - Valda filter:
-      - antal bokstäver
-      - unique eller ej
+
 
  - Knapp och input för att skicka in resultat till highscore
  - Knapp för att starta nytt spel
@@ -49,7 +47,22 @@ Tester:
 
 test('Default game settings and immediate win', async ({ page }) => {
 await page.goto('/');
-  
+
 await expect(page.getByRole("heading", { name: "Wordle Game" })).toBeVisible();
+
+await expect(page.getByLabel("Word length:")).toHaveValue("5");
+await expect(page.getByLabel("Include repeated letters:")).not.toBeChecked();
+
+await page.getByRole("button", { name: "Start game" }).click();
+
+await page.getByLabel("Your guess:").fill("melon");
+await page.getByRole("button", { name: "Guess" }).click();
+
+  await expect(page.getByText("You won!")).toBeVisible();
+  await expect(page.getByText(/Guesses: 1/)).toBeVisible();
+  await expect(page.getByText(/Final time:/)).toBeVisible();
+
+  const winningTiles = page.locator(".tile.correct");
+  await expect(winningTiles).toHaveCount(5);
 
 });
