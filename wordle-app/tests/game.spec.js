@@ -41,11 +41,15 @@ Spel:
 
 
 Tester:
-- A: "happy path" - default inställningar, rätt svar direkt
+- A: Rätt gissning direkt (default filtrering)
+  - testar även uppstart av spelet och default filtrering 
+
+- B: Fel gissning, följt av rätt gissning (default filtrering)
+  - testar att man får ett nytt försök och att antal gissningar går upp 
 
 */
 
-test('Default game settings and immediate win', async ({ page }) => {
+test('A: Default game settings and immediate win', async ({ page }) => {
 await page.goto('/');
 
 await expect(page.getByRole("heading", { name: "Wordle Game" })).toBeVisible();
@@ -64,5 +68,29 @@ await page.getByRole("button", { name: "Guess" }).click();
 
   const winningTiles = page.locator(".tile.correct");
   await expect(winningTiles).toHaveCount(5);
+
+});
+
+test('B: Incorrect guess followed by correct guess', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole("button", { name: "Start game" }).click();
+
+  await page.getByLabel("Your guess:").fill("päron");
+  await page.getByRole("button", { name: "Guess" }).click();
+
+  const firstRow = page.locator(".row").first();
+
+  await expect(firstRow.locator(".tile")).toHaveCount(5);
+  await expect(firstRow.locator(".correct")).toHaveCount(2);
+  await expect(firstRow.locator(".incorrect")).toHaveCount(3);
+    await expect(page.getByText("You won!")).not.toBeVisible();
+
+  await page.getByLabel("Your guess:").fill("melon");
+  await page.getByRole("button", { name: "Guess" }).click();
+
+  await expect(page.getByText("You won!")).toBeVisible();
+  await expect(page.getByText(/Guesses: 2/)).toBeVisible();
+  await expect(page.getByText(/Final time:/)).toBeVisible();
 
 });

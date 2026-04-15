@@ -7,8 +7,8 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: "cd server && set TEST_MODE=true && npm start",
+    command: "cd server && npm run start:test",
     port: 5080,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
 });

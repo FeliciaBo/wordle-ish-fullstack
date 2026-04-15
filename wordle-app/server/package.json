@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
+    "start:test": "cross-env TEST_MODE=true node server.js",
     "build:ts": "tsc"
   },
   "keywords": [],
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
+    "cross-env": "^10.1.0",
     "typescript": "^6.0.2"
   }
 }
