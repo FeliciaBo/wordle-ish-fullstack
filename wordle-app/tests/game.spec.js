@@ -43,15 +43,23 @@ Spel:
 Tester:
 - A: Rätt gissning direkt (default filtrering)
   - testar även uppstart av spelet och default filtrering 
+  - rätt saker visas när spelet är slut
 
 - B: Fel gissning, följt av rätt gissning (default filtrering)
   - testar att man får ett nytt försök 
-  - feedbakc: correct, misplaced och incorrect visas
+  - feedback: correct, misplaced och incorrect visas
   - antal gissningar går upp 
+
+- C: Ord med 3 bokstäver
+  - testar även att det går att starta ett nytt spel
+
+- D: Ord med flera av samma bokstav
+  - testar även att det går att skicka in resultat till highscore
+    och syns i highscore-listan
 
 */
 
-test('A: Default game settings and immediate win', async ({ page }) => {
+test('A: Default game settings and immediate win (word: "melon")', async ({ page }) => {
 await page.goto('/');
 
 await expect(page.getByRole("heading", { name: "Wordle Game" })).toBeVisible();
@@ -73,7 +81,7 @@ await page.getByRole("button", { name: "Guess" }).click();
 
 });
 
-test('B: Incorrect guess followed by correct guess', async ({ page }) => {
+test('B: Incorrect guess followed by correct guess (word: "melon")', async ({ page }) => {
   await page.goto('/');
 
   await page.getByRole("button", { name: "Start game" }).click();
@@ -96,4 +104,35 @@ test('B: Incorrect guess followed by correct guess', async ({ page }) => {
   await expect(page.getByText(/Guesses: 2/)).toBeVisible();
   await expect(page.getByText(/Final time:/)).toBeVisible();
 
+});
+
+test('C: 3-letter word (word: "bär") + start new game', async ({ page }) => {
+  await page.goto('/');
+
+  await page.goto("/");
+
+  await page.getByLabel("Word length:").fill("3");
+  await page.getByRole("button", { name: "Start game" }).click();
+
+  await page.getByLabel("Your guess:").fill("bär");
+  await page.getByRole("button", { name: "Guess" }).click();
+
+  await expect(page.getByText("You won!")).toBeVisible();
+
+  await page.getByRole("button", { name: "Start new game" }).click();
+
+  await expect(page.getByText("You won!")).not.toBeVisible(); 
+
+  await expect(page.getByLabel("Word length:")).toBeVisible();
+  await expect(page.getByLabel("Include repeated letters:")).toBeVisible();
+
+  await page.getByRole("button", { name: "Start game" }).click();
+
+});
+
+
+test('D: Word with duplicate letters (word: "banan") + send to highscore ', async ({ page }) => {
+  await page.goto('/');
+
+  
 });

@@ -27,7 +27,7 @@ function getMockWord(length, unique) {
   const mockWords = {
     "5-true": "melon",
     "5-false": "banan",
-    "3-true": "bar",
+    "3-true": "bär",
   };
 
   return mockWords[`${length}-${unique}`] || null;
