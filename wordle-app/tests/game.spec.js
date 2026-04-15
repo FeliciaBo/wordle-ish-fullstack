@@ -22,6 +22,7 @@ Spel:
  - Spelresultat visas:  
     - antal gissningar
     - tid (från backend)
+    - rätt ord
 
  - Knapp och input för att skicka in resultat till highscore
  - Knapp för att starta nytt spel
@@ -71,9 +72,21 @@ await page.getByRole("button", { name: "Start game" }).click();
 await page.getByLabel("Your guess:").fill("melon");
 await page.getByRole("button", { name: "Guess" }).click();
 
-  await expect(page.getByText("You won!")).toBeVisible();
-  await expect(page.getByText(/Guesses: 1/)).toBeVisible();
-  await expect(page.getByText(/Final time:/)).toBeVisible();
+
+await expect(page.getByText("You won!")).toBeVisible();
+await expect(page.getByText(/Guesses: 1/)).toBeVisible();
+await expect(page.getByText(/Final time:/)).toBeVisible();
+
+  //"melon" visas
+  const winRow = page.locator(".row").last();
+
+ await expect(winRow.locator(".tile")).toHaveCount(5);
+
+ await expect(winRow.locator(".tile").nth(0)).toHaveText("m");
+ await expect(winRow.locator(".tile").nth(1)).toHaveText("e");
+ await expect(winRow.locator(".tile").nth(2)).toHaveText("l");
+ await expect(winRow.locator(".tile").nth(3)).toHaveText("o");
+ await expect(winRow.locator(".tile").nth(4)).toHaveText("n");
 
   const winningTiles = page.locator(".tile.correct");
   await expect(winningTiles).toHaveCount(5);
