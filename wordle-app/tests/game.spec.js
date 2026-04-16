@@ -65,7 +65,7 @@ Tester:
 
 */
 
-test('A: Default game settings and immediate win (word: "melon")', async ({ page }) => {
+test('A: Default game settings and immediate win', async ({ page }) => {
 await page.goto('/');
 
 await expect(page.getByText(/^Error:/)).toHaveCount(0);
