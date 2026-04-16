@@ -42,6 +42,7 @@ Spel:
 Tester:
 - A: Rätt gissning direkt (default filtrering)
   - testar även uppstart av spelet och default filtrering 
+  - inga felmeddelanden dyker upp
   - rätt saker visas när spelet är slut
 
 - B: Fel gissning, följt av rätt gissning (default filtrering)
@@ -62,6 +63,7 @@ Tester:
 test('A: Default game settings and immediate win (word: "melon")', async ({ page }) => {
 await page.goto('/');
 
+await expect(page.getByText(/^Error:/)).toHaveCount(0);
 await expect(page.getByRole("heading", { name: "Wordle Game" })).toBeVisible();
 
 await expect(page.getByLabel("Word length:")).toHaveValue("5");
@@ -69,10 +71,12 @@ await expect(page.getByLabel("Include repeated letters:")).not.toBeChecked();
 
 await page.getByRole("button", { name: "Start game" }).click();
 
+await expect(page.getByText(/^Error:/)).toHaveCount(0);
 await page.getByLabel("Your guess:").fill("melon");
+
 await page.getByRole("button", { name: "Guess" }).click();
 
-
+await expect(page.getByText(/^Error:/)).toHaveCount(0);
 await expect(page.getByText("You won!")).toBeVisible();
 await expect(page.getByText(/Guesses: 1/)).toBeVisible();
 await expect(page.getByText(/Final time:/)).toBeVisible();
