@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test';
  
 /* Testning:
 
+(test från tidigare uppgift:
+- logik för feedback (correct, misplaced, incorrect, samt felhantering
+- Logic för chooseWord (välja ut ord utifrån filter, samt felhantering) 
+)
+
 Spel:
 
 1. Innan spel:
@@ -141,6 +146,7 @@ test('C: 3-letter word + start new game', async ({ page }) => {
   await expect(page.getByLabel("Include repeated letters:")).toBeVisible();
 
   await page.getByRole("button", { name: "Start game" }).click();
+  await expect(page.getByLabel("Your guess:")).toHaveCount(0);
 
 });
 
@@ -164,6 +170,11 @@ test('D: Duplicate letter word + shows up in highscores, with filter', async ({ 
   await expect(page.getByText("Score saved!")).toBeVisible();
 
   await page.goto("/highscores?length=6&unique=false");
-  await expect(page.getByText(playerName)).toBeVisible();
-  
+
+  const row = page.getByRole("row", { name: playerName });
+
+ await expect(row).toBeVisible();
+ await expect(row).toContainText("6");
+ await expect(row).toContainText("No");  
+
 });
