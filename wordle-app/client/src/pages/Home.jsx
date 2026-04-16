@@ -288,6 +288,7 @@ function Home() {
           <button className="start-button" onClick={resetToStartView}>
             Start new game
           </button>
+          
         </div>
       )}
     </div>
