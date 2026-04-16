@@ -217,6 +217,7 @@ app.get("/highscores", async (req, res) => {
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "../client/dist")));
+app.use("/styles", express.static(path.join(__dirname, "../client/src/styles")));
 
 app.get("/{*splat}", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/dist/index.html"));
