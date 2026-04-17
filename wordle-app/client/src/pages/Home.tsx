@@ -6,7 +6,11 @@ import ActiveGameView from "../components/home/ActiveGameView";
 import WinView from "../components/home/WinView";
 import type { GuessEntry, GameResult } from "../components/home/types";
 
-const API_BASE = "http://localhost:5080/api";
+import {
+  startGameApi,
+  submitGuessApi,
+  saveScoreApi,
+} from "../api/gameApi";
 
 function getStatus(feedbackItem: string | undefined): string {
   return feedbackItem?.split(": ")[1] || "";
@@ -76,14 +80,7 @@ function Home() {
 
       const unique = !allowRepeats;
 
-      const response = await fetch(
-        `${API_BASE}/word?length=${length}&unique=${unique}`
-      );
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Could not start game");
-      }
+      const data = await startGameApi(length, unique);
 
       setGameId(data.gameId);
       setGameStarted(true);
@@ -105,22 +102,7 @@ function Home() {
     try {
       const trimmedGuess = guess.trim().toLowerCase();
 
-      const response = await fetch(`${API_BASE}/guess`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          gameId,
-          guess: trimmedGuess,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Could not submit guess");
-      }
+      const data = await submitGuessApi(gameId, trimmedGuess);
 
       const newGuessEntry: GuessEntry = {
         guess: trimmedGuess,
@@ -152,23 +134,7 @@ function Home() {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/highscores`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          gameId,
-          name: playerName,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Could not save score");
-      }
-
+      await saveScoreApi(gameId, playerName);
       setScoreSaved(true);
     } catch (err) {
       const message =
