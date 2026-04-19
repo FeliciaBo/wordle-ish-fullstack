@@ -45,6 +45,7 @@ function WinView({
 
       {!scoreSaved ? (
         <form onSubmit={onSaveScore}>
+          <h2>Add to highscore</h2>
           <label>
             Your name:
             <input
@@ -53,7 +54,7 @@ function WinView({
               onChange={(event) => onPlayerNameChange(event.target.value)}
             />
           </label>
-
+           
           <button type="submit">Save score</button>
         </form>
       ) : (
