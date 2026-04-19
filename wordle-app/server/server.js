@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import chooseWord from "./logic/chooseWord.js";
 import feedback from "./logic/feedback.js";
 import connectToDatabase from "./db/mongodb.js";
+import loadWords from "./data/loadWords.js";
 
 import parseHighscoreFilters from "./dist-ts/utils/parseHighscoreFilters.js";
 import buildHighscoreQuery from "./dist-ts/utils/buildHighscoreQuery.js";
@@ -21,7 +22,6 @@ const __dirname = path.dirname(__filename);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-const words = ["banan", "melon", "kiwi", "citron", "äpple", "päron", "apelsin", "jordgubb", "lime", "is", "i" ];
 
 function getMockWord(length, unique) {
   const mockWords = {
@@ -52,7 +52,10 @@ app.get("/api/word", async (req, res) => {
         throw new Error("No mock word found for these settings");
       }
     } else {
+      const words = await loadWords();
       word = chooseWord(words, length, unique);
+
+      console.log(word);
     }
 
     const gameId = crypto.randomUUID();
