@@ -54,8 +54,6 @@ app.get("/api/word", async (req, res) => {
     } else {
       const words = await loadWords();
       word = chooseWord(words, length, unique);
-
-      console.log(word);
     }
 
     const gameId = crypto.randomUUID();
